@@ -54,6 +54,7 @@ def find_instrument(class_num, instrument_num, instrument_data):
         if int(row[0]) == class_num and int(row[1]) == instrument_num:
             return int(row[3])
 
+# Creates a function to scale numbers
 def scale(value, in_min, in_max, out_min, out_max):
     return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
     
@@ -83,13 +84,16 @@ for row in instrument_data:
     MyMIDI.addProgramChange(track_number, 0, 0, track_program)
     MyMIDI.addTrackName(track_number, 0, track_name)
 
+# Where the magic happens; iterate over each row and assign MIDI values
 for row in matrix:
+    # Is this row the begining of a section?
     if row[0] == 1:  # Check if the first column value is 1
         section_counter += 1
         seconds_adder = seconds
         print(f"Section {section_counter}:")  # Print section header
     seconds = round((seconds_adder + row[1]), 2)
     
+    # Pitch stuff
     if row[4] == 0:
         pitch = 60
         pitch_decimal = 0
@@ -98,17 +102,20 @@ for row in matrix:
         pitch = int(row[4]) + 22
         pitch_decimal = round((((row[4]) + 22) - pitch), 1)
         scaledPitch = int(scale(pitch_decimal, 0, 1, 0, 8192))
-        
+    
+    # Assign instruments
     track = find_instrument(row[2], row[3], instrument_data)
     
-
+    # MIDI duration cannot be zero; .25 is okay.
     if row[8] == 0:
         duration = .25
     else:
          duration = float(row[8])
     
+    # Scaled velocity for DYNAM row
     velocity = int(scale(row[9], minVel, maxVel, 20, 127))
     
+    # Where the magic happens, for real
     MyMIDI.addNote(track, channel, pitch, seconds, duration, velocity)
     
     channel = noteCounter % 16
