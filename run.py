@@ -85,7 +85,7 @@ for row in instrument_data:
     track_name = row[2]
     track_number = int(row[3])
     track_program = int(row[4]) - 1
-    track_channel = row[5]
+    track_channel = int(row[5]) - 1
     MyMIDI.addProgramChange(track_number, track_channel, 0, track_program)
     MyMIDI.addTrackName(track_number, 0, track_name)
 
@@ -99,6 +99,57 @@ for row in matrix:
     seconds = round((seconds_adder + row[1]), 2)
     
     # Pitch stuff
+    if assign_channel(row[2], row[3], instrument_data) == 9: #For ch 10, drum kit
+        if row[3] == 10: # Maracas
+            pitch = 70
+            pitch_decimal = 0
+            scaledPitch = 0
+        if row[3] == 11: # Susp. Cymbal
+            pitch = 49
+            pitch_decimal = 0
+            scaledPitch = 0
+        if row[3] == 12: # Gong
+            pitch = 52
+            pitch_decimal = 0
+            scaledPitch = 0
+    if assign_channel(row[2], row[3], instrument_data) == 0: # For channel 1: Wood Block
+        if row[3] == 1: # Major pentatonic(?) Sure I guess. This \/ is bad...
+            pitch = 60
+            pitch_decimal = 0
+            scaledPitch = 0
+        if row[3] == 2:
+            pitch = 62
+            pitch_decimal = 0
+            scaledPitch = 0
+        if row[3] == 3:
+            pitch = 64
+            pitch_decimal = 0
+            scaledPitch = 0
+        if row[3] == 4:
+            pitch = 67
+            pitch_decimal = 0
+            scaledPitch = 0
+        if row[3] == 5:
+            pitch = 69
+            pitch_decimal = 0
+            scaledPitch = 0
+    if assign_channel(row[2], row[3], instrument_data) == 1: # For channel 2: Toms
+        if row[3] == 6: # Major pentatonic(?)
+            pitch = 60
+            pitch_decimal = 0
+            scaledPitch = 0
+        if row[3] == 7:
+            pitch = 62
+            pitch_decimal = 0
+            scaledPitch = 0
+        if row[3] == 8:
+            pitch = 64
+            pitch_decimal = 0
+            scaledPitch = 0
+        if row[3] == 9:
+            pitch = 67
+            pitch_decimal = 0
+            scaledPitch = 0
     if row[4] == 0:
         pitch = 60
         pitch_decimal = 0
@@ -110,6 +161,7 @@ for row in matrix:
     
     # Assign instruments
     track = find_instrument(row[2], row[3], instrument_data)
+    channel = (assign_channel(row[2], row[3], instrument_data) - 1)
     
     # MIDI duration cannot be zero; .25 is okay.
     if row[8] == 0:
