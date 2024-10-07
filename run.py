@@ -53,6 +53,11 @@ def find_instrument(class_num, instrument_num, instrument_data):
     for row in instrument_data:
         if int(row[0]) == class_num and int(row[1]) == instrument_num:
             return int(row[3])
+            
+def assign_channel(class_num, instrument_num, instrument_data):
+    for row in instrument_data:
+        if int(row[0]) == class_num and int(row[1]) == instrument_num:
+            return int(row[5])
 
 # Creates a function to scale numbers
 def scale(value, in_min, in_max, out_min, out_max):
@@ -72,8 +77,7 @@ resolution = 50
 seconds_adder = 0
 noteCounter = 0 # Note counter is going to be mod 15, this is how the slight adjustments in pitch work.
 
-MyMIDI = MIDIFile(int(num_tracks), True, False) # One track, defaults to format 1 (tempo track
-                     # automatically created)
+MyMIDI = MIDIFile(int(num_tracks), True, False) # One track, defaults to format 1 (tempo track # automatically created)
 MyMIDI.addTempo(track,time, tempo)
 
 # Creates tracks and assigns instruments for each instrument in the instruments.txt file       
@@ -81,7 +85,8 @@ for row in instrument_data:
     track_name = row[2]
     track_number = int(row[3])
     track_program = int(row[4]) - 1
-    MyMIDI.addProgramChange(track_number, 0, 0, track_program)
+    track_channel = row[5]
+    MyMIDI.addProgramChange(track_number, track_channel, 0, track_program)
     MyMIDI.addTrackName(track_number, 0, track_name)
 
 # Where the magic happens; iterate over each row and assign MIDI values
@@ -117,18 +122,15 @@ for row in matrix:
     
     # Where the magic happens, for real
     MyMIDI.addNote(track, channel, pitch, seconds, duration, velocity)
-    
-    channel = noteCounter % 16
-    
-    if decPitch == True:
-        
+    if decPitch == True:    
+        channel = noteCounter % 16      
         MyMIDI.addPitchWheelEvent(track, channel, seconds, scaledPitch)
         MyMIDI.addPitchWheelEvent(track, channel, seconds + duration, 0)
 
-    if channel == 8:
-        noteCounter =+ 1
+        if channel == 8:
+            noteCounter =+ 1
         
-    noteCounter =+ 1
+        noteCounter =+ 1
     
     
     
